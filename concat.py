@@ -14,7 +14,9 @@ for d in sorted(current_dir.iterdir()):
 merger = PdfFileMerger()
 
 for pdf in pdfs:
-    merger.append(pdf.open('rb'), bookmark=pdf.name.split('.')[0])
+    merger.append(pdf.open('rb'),
+                  bookmark=pdf.name.split('.')[0].replace('_', ':')
+                  .replace('|', '/'))
 
 with open('ostep.pdf', 'wb') as fout:
     merger.write(fout)

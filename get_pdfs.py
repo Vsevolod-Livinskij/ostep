@@ -8,10 +8,9 @@ import requests
 
 pdfs = defaultdict(list)
 
-if not Path('ostep.html').exists():
-    text = requests.get('http://pages.cs.wisc.edu/~remzi/OSTEP/').text
-    with open('ostep.html', 'w') as f:
-        f.write(text)
+text = requests.get('http://pages.cs.wisc.edu/~remzi/OSTEP/').text
+with open('ostep.html', 'w') as f:
+    f.write(text)
 
 url = 'http://pages.cs.wisc.edu/~remzi/OSTEP/%s'
 
@@ -29,11 +28,22 @@ for row in rows[1:]:
             continue
         pdfs[header[i]].append((td.text.strip(), url % a['href']))
 
+appendix_idx = 'A'
+
 for i, chap in enumerate(pdfs):
     chap_dir = Path(str(i) + ' ' + chap)
     chap_dir.mkdir(exist_ok=True)
     for title, url in pdfs[chap]:
-        title = title.replace('/', '_').replace(':', '_')
+        title = title.replace('/', '|').replace(':', '_')
+        if title[1] == ' ':
+            title = '0' + title
+        if title.endswith(' code'):
+            title = title.rstrip(' code')
+        if chap == 'Appendices':
+            title = appendix_idx + ' ' + title
+            appendix_idx = chr(ord(appendix_idx) + 1)
+        elif not title[0].isdigit():
+            title = '00 ' + title
         print(title)
         pdf = chap_dir / (title + '.pdf')
         if pdf.exists():
